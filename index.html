@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
+<title>Dating Profile Disaster</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: one phone-width column. Header, a single hand panel, then full-screen sheets for the profile and the rules. */
+:root{
+  --bg:#17121a; --surface:#211a26; --surface2:#2b2231; --line:#3a2f42;
+  --fg:#f4eef6; --muted:#a99bb0; --accent:#ff6f7d; --accent-ink:#2a0a10;
+  --c-opener:#ff9f6b; --c-hobby:#6bc7ff; --c-flag:#ff5a6e; --c-want:#9be28a; --c-wild:#c9a8ff;
+  --font-display:"Avenir Next","Trebuchet MS","Segoe UI",system-ui,-apple-system,sans-serif;
+  --font-body:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    --bg:#faf5f7; --surface:#ffffff; --surface2:#f3eaf0; --line:#e4d5de;
+    --fg:#2a1d2e; --muted:#7a6a80; --accent:#d93a52; --accent-ink:#ffffff;
+    --c-opener:#d9722f; --c-hobby:#2a8fc7; --c-flag:#d93a52; --c-want:#4a9a3a; --c-wild:#8a5fd1;
+    color-scheme:light;
+  }
+}
+:root[data-theme="light"]{
+  --bg:#faf5f7; --surface:#ffffff; --surface2:#f3eaf0; --line:#e4d5de;
+  --fg:#2a1d2e; --muted:#7a6a80; --accent:#d93a52; --accent-ink:#ffffff;
+  --c-opener:#d9722f; --c-hobby:#2a8fc7; --c-flag:#d93a52; --c-want:#4a9a3a; --c-wild:#8a5fd1;
+  color-scheme:light;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0; background:var(--bg); color:var(--fg); font-family:var(--font-body); font-size:16px; line-height:1.4;
+  -webkit-tap-highlight-color:transparent;
+}
+.app{
+  max-width:30rem; margin:0 auto; padding-block:1rem 2.5rem;
+  padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px));
+}
+header{display:flex; align-items:center; justify-content:space-between; gap:.75rem; margin-bottom:.25rem;}
+h1{font-family:var(--font-display); font-weight:800; font-size:1.55rem; line-height:1.05; letter-spacing:-.01em; margin:0; text-wrap:balance;}
+h1 span{color:var(--accent);}
+.iconbtn{
+  flex:none; width:2.5rem; height:2.5rem; border-radius:50%; border:1px solid var(--line);
+  background:var(--surface); color:var(--fg); font:700 1rem var(--font-body); cursor:pointer;
+}
+.deckcount{color:var(--muted); font-size:.72rem; letter-spacing:.04em; opacity:.75; margin:0 0 1rem;}
+.panel{background:var(--surface); border:1px solid var(--line); border-radius:1rem; padding:1rem;}
+.panel h2{font-size:.8rem; font-weight:500; color:var(--muted); margin:0 0 .75rem;}
+.hand{display:flex; flex-direction:column; gap:.5rem;}
+.card{
+  --cat:var(--c-opener);
+  display:flex; align-items:center; gap:.75rem; min-width:0; min-height:3.75rem;
+  background:var(--surface2); border:1.5px solid var(--line); border-left:4px solid var(--cat);
+  border-radius:.75rem; padding:.6rem .75rem; cursor:pointer; user-select:none;
+}
+.card.cat-opener{--cat:var(--c-opener);} .card.cat-hobby{--cat:var(--c-hobby);}
+.card.cat-flag{--cat:var(--c-flag);} .card.cat-want{--cat:var(--c-want);}
+.card.cat-wild{--cat:var(--c-wild); border-left-style:dashed;}
+.card.sel{border-color:var(--accent); border-left-color:var(--cat); background:color-mix(in srgb, var(--accent) 14%, var(--surface2));}
+.card:focus-visible,.btn:focus-visible,.iconbtn:focus-visible,.textbtn:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+.body{flex:1; min-width:0;}
+.tag{display:block; font-size:.66rem; font-weight:700; text-transform:uppercase; letter-spacing:.09em; color:var(--cat); margin-bottom:.15rem;}
+.txt{display:block; font-size:1rem; overflow-wrap:anywhere;}
+.card textarea{
+  display:block; width:100%; background:transparent; border:0; border-bottom:1px dashed var(--muted); color:var(--fg);
+  font:inherit; padding:.15rem 0; outline:none; resize:none;
+}
+.card textarea:focus{border-bottom-color:var(--accent);}
+.mark{
+  flex:none; width:1.75rem; height:1.75rem; border-radius:50%; border:1.5px solid var(--line);
+  display:grid; place-items:center; font-size:.85rem; font-weight:700; color:var(--accent-ink);
+}
+.card.sel .mark{background:var(--accent); border-color:var(--accent);}
+.status{text-align:center; color:var(--muted); font-size:.8rem; margin:.75rem 0 .25rem;}
+.row{display:flex; gap:.5rem; flex-wrap:wrap;}
+.row .btn{flex:1 1 9rem;}
+.btn{
+  background:var(--accent); color:var(--accent-ink); border:0; border-radius:.75rem; padding:.85rem 1rem;
+  font:700 1rem var(--font-body); cursor:pointer; margin-top:.5rem; width:100%;
+}
+.row .btn{width:auto;}
+.btn.alt{background:var(--surface2); color:var(--fg); border:1px solid var(--line);}
+.btn:disabled{opacity:.4; cursor:not-allowed;}
+.hint{color:var(--muted); font-size:.78rem; margin:.75rem 0 0;}
+.sheet{
+  position:fixed; inset:0; z-index:50; background:var(--bg); overflow-y:auto;
+  padding-top:env(safe-area-inset-top, 0px); padding-bottom:env(safe-area-inset-bottom, 0px);
+  padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px));
+}
+.sheet-in{max-width:30rem; margin:0 auto; min-height:100%; display:flex; flex-direction:column; justify-content:center; gap:1rem; padding-block:4.5rem 2rem;}
+.close{position:absolute; top:calc(.75rem + env(safe-area-inset-top, 0px)); right:max(16px, env(safe-area-inset-right, 0px)); z-index:2;}
+.profile{background:var(--surface); border:1px solid var(--line); border-radius:1.25rem; padding:1.25rem; text-align:center;}
+.avatar{
+  width:5rem; height:5rem; border-radius:50%; margin:0 auto .5rem; position:relative; overflow:hidden;
+  background:var(--surface2); border:2px solid var(--accent);
+}
+.avatar::before{content:""; position:absolute; left:50%; top:20%; width:34%; height:34%; border-radius:50%; background:var(--muted); transform:translateX(-50%); opacity:.7;}
+.avatar::after{content:""; position:absolute; left:50%; top:60%; width:70%; height:70%; border-radius:50%; background:var(--muted); transform:translateX(-50%); opacity:.7;}
+.match{display:inline-block; font-size:.75rem; font-weight:700; letter-spacing:.06em; color:var(--accent); border:1px solid var(--accent); border-radius:2rem; padding:.15rem .6rem; margin-bottom:1rem;}
+.lines{display:flex; flex-direction:column; gap:.9rem; text-align:left;}
+.line{font-family:var(--font-display); font-weight:700; font-size:clamp(1.3rem, 5.5vw, 1.7rem); line-height:1.2; text-wrap:balance; overflow-wrap:anywhere;}
+.line + .line{border-top:1px solid var(--line); padding-top:.9rem;}
+.profile textarea{
+  width:100%; min-height:11rem; background:var(--surface2); color:var(--fg); border:1px solid var(--line);
+  border-radius:.75rem; padding:.85rem; font:700 1.15rem/1.3 var(--font-display); resize:vertical;
+}
+.textbtn{background:none; border:0; color:var(--muted); font:500 .78rem var(--font-body); text-decoration:underline; opacity:.6; cursor:pointer; padding:.5rem; align-self:center;}
+.textbtn:hover{opacity:1;}
+.rules h2{font-family:var(--font-display); font-size:1.5rem; margin:0 0 .25rem;}
+.rules ol{margin:0; padding-left:1.2rem; display:flex; flex-direction:column; gap:.55rem;}
+.rules li::marker{color:var(--accent); font-weight:700;}
+.rules p{color:var(--muted); font-size:.85rem; margin:.75rem 0 0;}
+.legend{display:flex; flex-wrap:wrap; gap:.4rem .9rem; margin-top:.9rem; font-size:.78rem;}
+.legend i{display:inline-block; width:.7rem; height:.7rem; border-radius:2px; margin-right:.35rem; vertical-align:-1px;}
+@media (prefers-reduced-motion: no-preference){
+  .card{transition:background .12s, border-color .12s;}
+}
+</style>
+
+<div class="app">
+  <header>
+    <h1>Dating Profile <span>Disaster</span></h1>
+    <button class="iconbtn" id="rulesBtn" aria-label="How to play">?</button>
+  </header>
+  <p class="deckcount" id="deckCount"></p>
+
+  <section class="panel" aria-label="Your hand">
+    <h2>Your hand. Tap 3 cards to build your profile.</h2>
+    <div class="hand" id="hand"></div>
+    <p class="status" id="status"></p>
+    <div class="row">
+      <button class="btn" id="showBtn">Show my profile</button>
+      <button class="btn alt" id="swapBtn">Swap selected</button>
+    </div>
+    <button class="btn alt" id="newBtn">New hand</button>
+    <p class="hint" id="hint"></p>
+  </section>
+</div>
+
+<div class="sheet" id="profileSheet" hidden>
+  <button class="iconbtn close" id="profileClose" aria-label="Close profile">✕</button>
+  <div class="sheet-in">
+    <div class="profile">
+      <div class="avatar" aria-hidden="true"></div>
+      <div class="match" id="match"></div>
+      <div class="lines" id="lines"></div>
+    </div>
+    <button class="textbtn" id="editBtn">edit</button>
+  </div>
+</div>
+
+<div class="sheet" id="rulesSheet" hidden>
+  <button class="iconbtn close" id="rulesClose" aria-label="Close rules">✕</button>
+  <div class="sheet-in rules">
+    <div class="profile" style="text-align:left">
+      <h2>How to play</h2>
+      <ol>
+        <li>Everyone opens this on their own phone and gets 8 cards, with at least one of each kind.</li>
+        <li>Pick 3 cards. The order you tap is the order they read.</li>
+        <li>Tap Show my profile and read it aloud, or hold up the screen.</li>
+        <li>The group decides who wrote the worst profile and who would still get the most matches. Agree your own turns and scoring.</li>
+        <li>Swap up to 3 cards once per hand, or take a new hand.</li>
+        <li>Openers and blank wild cards are editable: type straight into them. Tap edit on a profile to change the wording.</li>
+      </ol>
+      <div class="legend">
+        <span><i style="background:var(--c-opener)"></i>Opener</span>
+        <span><i style="background:var(--c-hobby)"></i>Hobby</span>
+        <span><i style="background:var(--c-flag)"></i>Red flag</span>
+        <span><i style="background:var(--c-want)"></i>Looking for</span>
+        <span><i style="background:var(--c-wild)"></i>Wild</span>
+      </div>
+      <p>The app only deals cards. It does not track turns or scores.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+const CARDS = {
+  opener: [
+    "Fluent in sarcasm and three words of French","6'2\" in shoes I don't own","Not like other people, I'm exactly like Gary",
+    "Swipe right if you can handle","My therapist says I should put myself out there","Just a regular guy who",
+    "Recently single, formerly engaged to a lighthouse","Hello, I'm a Gemini and","Ex-barista, current legend",
+    "Looking for my partner in crime, and also my alibi","My mum thinks I'm a catch","Warning: I will quote The Office",
+    "Yes, that's my real hair","Fresh out of a seven-year situationship","Cat person, but the cat hates me",
+    "Unemployed but very busy","Don't ask about the incident at","Honest, funny, and legally not allowed near",
+    "Dad bod with a mum heart","Famous in my building for","Two truths and a lie, guess which",
+    "Certified lifeguard who","Single because I'm too good at","Voted most likely to",
+    "Peaked in 2011, still going","Small business owner (it's a lemonade stand)","Just here because my sister made me",
+    "Ask me about my five-year plan, it's mostly snacks"
+  ],
+  hobby: [
+    "I collect vintage mayonnaise jars","I do competitive yo-yoing every weekend","I'm training for a marathon I haven't signed up for",
+    "I spend weekends reenacting medieval battles","I bake sourdough and name every loaf","I narrate my own life like a nature documentary",
+    "I'm into birdwatching, mostly neighbours","I do stand-up (nobody has booked me)","I play the ukulele at funerals",
+    "I deep-clean my car at 3am","I'm obsessed with true crime podcasts","I knit sweaters for my pet snake",
+    "I'm 400 hours into a single video game","I go to escape rooms and ruin them","I forage for mushrooms I can't identify",
+    "I'm a competitive cheese roller","I write poetry about my cat","I rewatch the same sitcom every night",
+    "I'm building a boat in my living room","I review public toilets online","I do CrossFit and will tell you about it",
+    "I keep a spreadsheet of every meal I've eaten","I'm in a band that has never played live","I restore old vending machines",
+    "I practise handstands in supermarkets","I collect stones I think are watching me","I go to weddings I wasn't invited to",
+    "I'm learning Latin for the vibes","I make furniture out of stolen pallets"
+  ],
+  flag: [
+    "my ex and I are \"basically still together\"","I have never once been wrong","I still use my mum's Netflix",
+    "I pour the milk before the cereal","I text back after exactly six days","my doorbell camera is my best friend",
+    "I have strong opinions about how you load a dishwasher","my friend Kevin lives in my attic","I read your messages aloud to my pet",
+    "I take group photos and crop everyone else out","I need a day's notice before I'm pleasant","I was banned from a petting zoo",
+    "I will correct your pronunciation","I always know a guy","I ghost, then turn up at your work",
+    "I put pineapple on everything, including soup","I'm very close with my landlord","I wear sunglasses indoors and at funerals",
+    "I only send voice notes over twelve minutes","I tip 0% on principle","I keep a bag packed by the door at all times",
+    "I already have a Pinterest board for our wedding","I film everything \"for insurance\"","I call my car \"she\" and I'm very protective",
+    "I sleep with one eye open, literally","I share my live location with everyone, always","I have a spare key to your place (we haven't met)",
+    "I'm allergic to commitment and most foods"
+  ],
+  want: [
+    "seeking someone who can parallel park","must love dogs, but the dog must love me first","looking for a Bonnie to my slightly-above-average Clyde",
+    "seeking a co-pilot for chaos","you must be fine with me inviting my ex to brunch","swipe right if you own a boat",
+    "looking for someone to split a Costco membership","must be able to carry me up three flights of stairs","if you can't handle me at 5am, don't message me",
+    "seeking a gym buddy who won't judge my protein shake collection","my love language is shared fries","my love language is you paying",
+    "looking for someone taller than the wardrobe","must be down for impromptu karaoke","seeking my soulmate or a very good plumber",
+    "looking for a plus-one to my cousin's wedding in six weeks","you must have a dog with a good Instagram","looking for a long-term relationship, or a short-term lease",
+    "please be fluent in memes","must tolerate my eleven houseplants","serious inquiries only, and maybe a casserole",
+    "looking for someone who knows the Wi-Fi password","ideal first date is you helping me move","no drama, only dramatic readings",
+    "must be okay with sharing a bathtub","swipe left if you hate the smell of fish","seeking someone who will laugh at my podcast",
+    "looking for a normal one, no experience necessary"
+  ]
+};
+const LABELS = {opener:"Opener", hobby:"Hobby", flag:"Red flag", want:"Looking for", wild:"Wild card"};
+const WILD_CHANCE = 0.1;
+const HAND_SIZE = 8;
+const ORDER = ["opener","hobby","flag","want","wild"];
+
+const $ = id => document.getElementById(id);
+let deck = [], hand = [], sel = [], swapUsed = false, lines = [];
+
+function shuffle(a){
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+function buildDeck(){
+  const d = [];
+  Object.entries(CARDS).forEach(([cat, list]) => list.forEach(text => d.push({cat, text})));
+  return shuffle(d);
+}
+// Extra cards have a 10% chance of being a blank, editable wild card.
+function draw(){
+  if(Math.random() < WILD_CHANCE) return {cat:"wild", text:"", wild:true};
+  if(!deck.length) deck = buildDeck();
+  return deck.pop();
+}
+function drawCat(cat){
+  let i = deck.map(c => c.cat).lastIndexOf(cat);
+  if(i < 0){ deck = shuffle(deck.concat(buildDeck())); i = deck.map(c => c.cat).lastIndexOf(cat); }
+  return deck.splice(i,1)[0];
+}
+// Fill the hand: any missing kind first, then random extras. Always shown in a fixed order.
+function fill(){
+  while(hand.length < HAND_SIZE){
+    const have = new Set(hand.map(c => c.cat));
+    const missing = ORDER.slice(0,4).filter(c => !have.has(c));
+    hand.push(missing.length ? drawCat(missing[0]) : draw());
+  }
+  hand.sort((a,b) => ORDER.indexOf(a.cat) - ORDER.indexOf(b.cat));
+}
+function deal(){
+  hand = []; sel = []; swapUsed = false;
+  fill();
+  render();
+}
+function toggle(i){
+  const p = sel.indexOf(i);
+  if(p > -1) sel.splice(p,1); else if(sel.length < 3) sel.push(i);
+  render();
+}
+function render(){
+  const box = $("hand"); box.innerHTML = "";
+  hand.forEach((c,i) => {
+    const pos = sel.indexOf(i);
+    const el = document.createElement("div");
+    el.className = "card cat-" + c.cat + (pos > -1 ? " sel" : "");
+    el.tabIndex = 0; el.setAttribute("role","button"); el.setAttribute("aria-pressed", pos > -1);
+    const body = document.createElement("div"); body.className = "body";
+    const tag = document.createElement("span"); tag.className = "tag"; tag.textContent = LABELS[c.cat];
+    body.appendChild(tag);
+    if(c.wild || c.cat === "opener"){
+      const inp = document.createElement("textarea");
+      inp.rows = 2; inp.id = "card" + i; inp.placeholder = "Write your own…"; inp.value = c.text; inp.maxLength = 90;
+      inp.setAttribute("aria-label", c.wild ? "Wild card text" : "Opener text, editable");
+      inp.addEventListener("input", () => { c.text = inp.value.replace(/\n/g, " "); });
+      inp.addEventListener("click", e => e.stopPropagation());
+      inp.addEventListener("keydown", e => e.stopPropagation());
+      body.appendChild(inp);
+    } else {
+      const t = document.createElement("span"); t.className = "txt"; t.textContent = c.text; body.appendChild(t);
+    }
+    const mark = document.createElement("span"); mark.className = "mark"; mark.textContent = pos > -1 ? pos + 1 : "";
+    el.append(body, mark);
+    el.addEventListener("click", () => toggle(i));
+    el.addEventListener("keydown", e => { if(e.key === "Enter" || e.key === " "){ e.preventDefault(); toggle(i); } });
+    box.appendChild(el);
+  });
+  $("status").textContent = sel.length + " of 3 selected";
+  $("showBtn").disabled = sel.length !== 3;
+  $("swapBtn").disabled = sel.length === 0 || swapUsed;
+  $("hint").textContent = swapUsed
+    ? "Swap used. Take a new hand to swap again."
+    : "Swap replaces the selected cards (up to 3), once per hand.";
+}
+function swap(){
+  if(swapUsed || !sel.length) return;
+  sel.slice().sort((a,b)=>b-a).forEach(i => hand.splice(i,1));
+  fill();
+  sel = []; swapUsed = true; render();
+}
+function showProfile(){
+  if(sel.length !== 3) return;
+  lines = sel.map(i => hand[i].text.trim() || "…");
+  $("match").textContent = (60 + Math.floor(Math.random()*40)) + "% match";
+  renderLines();
+  $("profileSheet").hidden = false;
+  $("editBtn").focus();
+}
+function renderLines(){
+  const box = $("lines"); box.innerHTML = "";
+  lines.forEach(l => { const d = document.createElement("div"); d.className = "line"; d.textContent = l; box.appendChild(d); });
+  const b = $("editBtn"); b.textContent = "edit"; b.dataset.mode = "view";
+}
+function toggleEdit(){
+  const b = $("editBtn");
+  if(b.dataset.mode === "view"){
+    const box = $("lines"); box.innerHTML = "";
+    const ta = document.createElement("textarea"); ta.id = "editArea"; ta.value = lines.join("\n");
+    ta.setAttribute("aria-label","Edit profile text");
+    box.appendChild(ta); ta.focus();
+    b.textContent = "save"; b.dataset.mode = "edit";
+  } else {
+    const v = $("editArea").value.split("\n").map(s => s.trim()).filter(Boolean);
+    lines = v.length ? v : ["…"];
+    renderLines();
+  }
+}
+function closeProfile(){ $("profileSheet").hidden = true; }
+
+$("showBtn").addEventListener("click", showProfile);
+$("swapBtn").addEventListener("click", swap);
+$("newBtn").addEventListener("click", deal);
+$("editBtn").addEventListener("click", toggleEdit);
+$("profileClose").addEventListener("click", closeProfile);
+$("rulesBtn").addEventListener("click", () => { $("rulesSheet").hidden = false; });
+$("rulesClose").addEventListener("click", () => { $("rulesSheet").hidden = true; });
+document.addEventListener("keydown", e => {
+  if(e.key === "Escape"){ closeProfile(); $("rulesSheet").hidden = true; }
+});
+
+const total = Object.values(CARDS).reduce((n,a) => n + a.length, 0);
+$("deckCount").textContent = total + " cards in the deck · 1 in 10 extra cards is a wild card";
+deal();
+</script>
+
+</body>
+</html>
